@@ -130,7 +130,7 @@ namespace Sov.AVGPart
         public void LoadScript()
         {
             string path = Settings.Instance.SCENARIO_SCRIPT_PATH + ScriptFilePath;
-
+            /*
 #if UNITY_STANDALONE_WIN          
             if (!File.Exists(path))
             {
@@ -141,8 +141,8 @@ namespace Sov.AVGPart
             ScriptContent = sr.ReadToEnd();
             sr.Close();
 #endif
-
-#if UNITY_ANDROID
+*/
+//#if UNITY_ANDROID
            // TextAsset t = Resources.Load<TextAsset>(path);
             path = Application.dataPath + path;
             if (!File.Exists(path))
@@ -155,7 +155,7 @@ namespace Sov.AVGPart
             StreamReader sr = File.OpenText(path);
             ScriptContent = sr.ReadToEnd();
             sr.Close();
-#endif
+//#endif
             //_phraser.SetScript(str);
             _engine.Phrase(this);
         }
