@@ -1,0 +1,98 @@
+//init
+[reg_textbox name=Main type=main]
+[reg_textbox name=Name type=name]
+[actor_new name=Maki]
+[actor_new name=Nico]
+
+[bg_change name=classroom fade=true fadetime=2]
+
+[cm]
+
+[enteractor name=Maki pos=center fade=true]
+
+#Maki
+Nice to meet you.[r]
+
+#Maki
+Hi ! My name is Maki.[p]
+
+#
+Let's change her face.[p]
+
+[changestate name=Maki state=Smile fade=true]
+
+Shake TextBox[p]  
+
+[shake name=TextBox]
+
+#Maki
+Trun Left[p]
+[moveactor name=Maki pos=left]
+
+#Maki
+Bigger~[p]
+[moveactor name=Maki z_pos=near]
+[wait time = 1000]
+[moveactor name=Maki z_pos=normal]
+
+#Nico
+Hi , Maki.[p]
+[enteractor name=Nico pos=right fade=true]
+#
+Change the message Target.[p]
+
+[cm]
+[current layer=TextBox_BG]
+
+The Message target has changed to the TextBox_BG.[p]
+
+Return to the Original Target.[p]
+
+[cm]
+[current layer=TextBox]
+
+The Message Target has returned to the original Target.[p]
+
+You can also display options.[p]
+
+*select
+
+[enteractor name=Maki pos=left fade=false]
+[enteractor name=Nico pos=right fade=false]
+
+[select_new  target=*select_a1]Nico~[end]
+[select_new  target=*select_a2]Maki~[end]
+[select_show]
+
+[s]
+
+*select_a1
+
+[exitactor name=Maki]
+[moveactor name=Nico pos=normal]
+#Nico
+にっこにっこにー☆[r]
+あなたのハートににこにこにー♪ [r]
+笑顏届ける矢澤にこにこー♪[p]
+にこにーって覚えてラブにこー♪[r]
+ダメダメダメにこにーはみんなのもっの♪[p]
+
+[jump target=*select]
+
+*select_a2
+
+[exitactor name=Nico]
+[moveactor name=Maki pos=normal]
+#Maki
+まっきまっきまー☆[r]
+ちょっと口が悪いけど、[l]
+ほんとは優しい、[l]
+真姫ちゃんですっ！[p]
+Хорошо![p]
+
+[jump target=*select]
+
+[cm]
+
+#
+Finish this demo.[p]
