@@ -1,11 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine;
 using SNovel.MessageNotificationCenter;
-
+using UniLua;
 //using Event = SNovel.EventDispatchCenter;
 //TODO: DEBUG类
 namespace SNovel
@@ -50,18 +47,16 @@ namespace SNovel
     public class ScriptEngine: MonoBehaviour
     {
         static ScriptEngine _sharedScriptedEngine = null;
-
-        public string ScriptFilePath = "/AVGPart/Resources/ScenarioScripts/";
-
        
-        public Scene.SceneStatus Status
+        public SceneStatus Status
         {
             get
             {
-                return _currentScene.Status;
+                return _currentBlock.Status;
             }
         }
-
+        
+        /*
        // List<OpCommand> _opLines;
 
         List<AbstractTag> _opTags
@@ -81,32 +76,43 @@ namespace SNovel
                 return _currentScene.ScenarioDict;
             }
         }
-
+        */
         int _currentLine
         {
             get
             {
-                return _currentScene.CurrentLine;
+                return BlockStack.Peek().Status.CurrentLine;
             }
             set
             {
-                _currentScene.CurrentLine = value;
+                BlockStack.Peek().Status.CurrentLine = value;
             }
         }
 
+        private Block _currentBlock
+        {
+            get
+            {
+                return BlockStack.Peek();
+            }
+        }
         KAGPhraser _phraser;
 
         //记录正在执行的场景
-        Scene _currentScene;
+        public Scene CurrentScene;
         #region Public Method
 
+        public ILuaState LuaState { get; private set; }
+       
         public virtual bool Init()
         {
             _phraser = new KAGPhraser();
-            _currentScene = null;
+            LuaState = LuaAPI.NewState();
+            LuaState.L_OpenLibs();
+            CurrentScene = null;
             return true;
         }
-
+        
         void Awake()
         {
             //注册监听事件
@@ -186,7 +192,7 @@ namespace SNovel
                 Status.CurrentScenario = scenarioName;
             }
         }*/
-
+        /*
         public void JumpToScenario(string scenarioName)
         {
             
@@ -208,7 +214,7 @@ namespace SNovel
         {
             _opTags.Insert(_currentLine, tag);
         }
-
+        */
         /*
          * @param string filePath:
          * 脚本文件在Resource下的路径
@@ -229,12 +235,12 @@ namespace SNovel
             //_phraser.SetScript(str);
             _phraser.Phrase();
         }*/
-
+        /*
         public void Phrase(Scene scenario)
         {
             _phraser.Phrase(scenario);
         }
-
+        */
         /*
         public void RunScript()
         {
@@ -249,18 +255,23 @@ namespace SNovel
 
         public void Run(Scene scene)
         {
-            _currentScene = scene;
+            CurrentScene = scene;
             Debug.Log("Run Script!");
+            BlockStack.Push(CurrentScene);
+            LuaState = LuaAPI.NewState();
+
             StartCoroutine(OnRun());
         }
 
         public void NextCommand()
         {
-            _currentLine++;
-            if (_currentLine >= _opTags.Count && !Status.IsFinish)
+            var curBlock = BlockStack.Peek();
+
+            curBlock.Status.CurrentLine++;
+            if (curBlock.Status.CurrentLine >= curBlock.Tags.Count && !curBlock.Status.IsFinish)
             {
-                Status.IsFinish = true;
-                _currentScene.OnFinish();
+                curBlock.Status.IsFinish = true;
+                CurrentScene.OnFinish();
             }
            // if (_currentLine < _opTags.Count)
            //     ExcuteCommand();
@@ -281,23 +292,18 @@ namespace SNovel
             }
         }*/
 
-        
+        public Stack<Block> BlockStack = new Stack<Block>(); 
         void ExcuteCommand()
         {
-            _currentScene.Status.SkipThisTag = false;
+            List<AbstractTag> tags = _currentBlock.Tags;
 
-            int currentLine = _currentScene.CurrentLine;
-            List<AbstractTag> tags = _currentScene.Tags;
-            
-            if (currentLine < tags.Count)
+            if (_currentLine < tags.Count)
             {
-                tags[currentLine].Before();
-                if (!Status.SkipThisTag)
-                {
-                    Status.EnableNextCommand = true;
-                    tags[currentLine].Excute();
-                    tags[currentLine].After();
-                }
+                _currentBlock.Tags[_currentLine].Before();
+                _currentBlock.Status.EnableNextCommand = true;
+                _currentBlock.Tags[_currentLine].Excute();
+                _currentBlock.Tags[_currentLine].After();
+
             }
         }
         #endregion
@@ -314,9 +320,9 @@ namespace SNovel
 
         IEnumerator OnRun()
         {
-            while (_currentLine < _opTags.Count)
+            while (_currentBlock.Status.CurrentLine < _currentBlock.Tags.Count)
             {
-                if(Status.EnableNextCommand)
+                if(_currentBlock.Status.EnableNextCommand)
                     ExcuteCommand();
                 yield return new WaitForEndOfFrame();
             }
@@ -327,13 +333,14 @@ namespace SNovel
         {
             return MessageDispatcher.Instance.DispatchMessage(e);
         }
+        /*
         int GetLastedLineNo()
         {
             return _opTags.Count;
         }
-
+        */
         //TODO: 实现一个消息通知系统
-        void OnClickContinue(Message pMessage)
+        public void OnClickContinue(Message pMessage)
         {
             /*
             if (_hideTextBox && _hasTextBoxToHide)
@@ -346,34 +353,14 @@ namespace SNovel
             }
             _hasTextBoxToHide = false;
             NextLine();*/
-            if (Status.EnableClickContinue)
+            if (_currentBlock.Status.EnableClickContinue)
             {
-                _currentLine++;
-                Status.EnableNextCommand = true;
+                //   _currentLine++;
+                _currentBlock.Status.EnableNextCommand = true;
+                _currentBlock.Status.EnableClickContinue = false;
             }
             //NextCommand();
         }
-
-     
-        /*
-        void OnCommandFinish(Message pMessage)
-        {
-            ++_currentLine;
-            if (_waitTouch)
-            {
-                Debug.Log("wait touch! Click to continue!");
-                _waitTouch = false;
-            }
-            else
-            {
-                NextLine();
-            }
-        }
-        void OnWaitTouch()
-        {
-            _waitTouch = true;
-        }
-        */
         #endregion
 
 

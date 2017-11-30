@@ -1,0 +1,30 @@
+[create_textbox_prefab name=General] //创建一个General prefab
+
+[create_textbox name=Dos]  //创建一个单一文本框
+
+[show name=General x=540 y=500]
+[show name=Dos x=540 y=1200]
+
+[current name=Dos type=main]//设置当前显示文字的文本框为Dos
+当前主文本框为Dos[pl]
+
+隐藏Dos框
+[hide name=Dos]
+
+[current name=General_main type=main]//设置当前显示文字的文本框为General 
+主文本框切换为General_main[rl]
+
+[current name=General_name type=name]//设置当前显示文字的文本框为General_name
+#123
+
+暂停，点击继续[l]
+清除主文本框文字[l]
+[cm]
+
+清除当前文本框内容并显示新的文本[p]
+
+在当前文本框显示基础上换行显示新文本[r]
+
+清除当前文本框内容并显示新的文本,暂停[pl]
+
+在当前文本框显示基础上换行显示新文本,暂停[rl]

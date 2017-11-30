@@ -20,7 +20,7 @@ namespace SNovel
     {
         public Lock_cameraTag()
         {
-            _defaultParamSet = new Dictionary<string, string>()
+            _defaultParams = new Dictionary<string, string>()
             {
             };
 
@@ -47,7 +47,7 @@ namespace SNovel
     {
         public Unlock_cameraTag()
         {
-            _defaultParamSet = new Dictionary<string, string>()
+            _defaultParams = new Dictionary<string, string>()
             {
             };
 

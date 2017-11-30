@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+
 namespace SNovel
 {
     class KAGPhraser
@@ -11,73 +12,34 @@ namespace SNovel
         public KAGPhraser()
         {
             _tokenizer = new Tokenizer();
-            _uploadTags = new List<AbstractTag>();
+            _tags = new List<AbstractTag>();
            // _tagManager = new KAGTagManager();
         }
 
 
         int _currentPhraseLineNo = 0;
 
-        List<AbstractTag> _uploadTags;
+        List<AbstractTag> _tags;
         
         string _scriptStream;
         
        // List<KAGWords> _phrasedLines;
         
         Tokenizer _tokenizer;
-        Scene _scenario;
-        public List<AbstractTag> Phrase(Scene s)
+       // Scene _scenario;
+        public List<AbstractTag> Phrase(string script)
         {
             //reset
             _currentPhraseLineNo = 0;
-            _uploadTags.Clear();
+            _tags.Clear();
 
-            _scriptStream = s.ScriptContent;
+            _scriptStream = script;
 
-            _scenario = s;
+         //   _scenario = s;
 
             Phrase();
-            return _uploadTags;
+            return _tags;
         }
-
-              
-        /*
-        static public List<Opcode> PhraseMessageTag(string tag)
-        {
-            List<Opcode> ops = new List<Opcode>();
-            switch (tag)
-            {
-                case "s":
-
-                case "cm":
-                    break;
-                case "er":
-                    ops.Add(Opcode.PAGE);
-                    break;
-                case "l":
-                    ops.Add(Opcode.WAIT_TOUCH);
-                    break;
-                case "p":            
-                    ops.Add(Opcode.WAIT_TOUCH);
-                    ops.Add(Opcode.PAGE);
-                    break;
-                case "r":             
-                    ops.Add(Opcode.WAIT_TOUCH);
-                    ops.Add(Opcode.RELINE);
-                    break;
-                case "endlink":
-                case "hidemessage":
-                default:
-                    break;
-            }
-            return ops;
-        
-        }*/
-        /*
-        public void SetScript(string String)
-        {
-            _scriptStream = String;
-        }*/
 
 
         #region PrivateMethod
@@ -87,19 +49,29 @@ namespace SNovel
             string[] list;
             list = _scriptStream.Split(new Char[] { '\n' }, StringSplitOptions.None);
 
-            foreach (string line in list)
+            for (int i = 0; i < list.Length; ++i)
             {
+                string line = list[i];
                 string str = line.Trim();
                 if (str == "")
                 {
                     _currentPhraseLineNo++;
                     continue;
                 }
-
+                
                 KAGWords l = _tokenizer.GetToken(str);
-                if (l != null)
+                if (l == null) continue;
+                if (l[0].Name == "script" && l[0].Value == "begin")
+                {
+                    i = PhraseScript(list, i + 1);
+                    _currentPhraseLineNo = i;
+                    continue;
+                    
+                }
+                else
                 {
                     PhraseALine(l);
+
                 }
                 _currentPhraseLineNo++;
             }
@@ -127,7 +99,7 @@ namespace SNovel
                         tagInfo.Params[param.Name] = param.Value;
                     }
                 }
-                CreateAndSendTagToEngine(tagInfo);
+                CreateTag(tagInfo);
             }
         }
 
@@ -168,12 +140,12 @@ namespace SNovel
                 if (name == "text")
                 {
                     tagInfo.Params["text"] = word.Value;
-                    CreateAndSendTagToEngine(tagInfo);
+                    CreateTag(tagInfo);
                 }
                 else if (name == "op")
                 {
                     TagInfo tagInfo1 = new TagInfo(word.Value.ToLower());
-                    CreateAndSendTagToEngine(tagInfo1);
+                    CreateTag(tagInfo1);
                 }
             }
         }
@@ -188,18 +160,44 @@ namespace SNovel
                 if (name == "text")
                 {
                     tagInfo.Params["text"] = word.Value;
-                    CreateAndSendTagToEngine(tagInfo);
+                    CreateTag(tagInfo);
                 }
             }
         }
-        void CreateAndSendTagToEngine(TagInfo tagInfo)
+
+        int PhraseScript(string[] lines, int beginLine)
+        {
+            TagInfo tagInfo = new TagInfo("luascript");
+
+            StringBuilder sb = new StringBuilder();
+            while (beginLine < lines.Length)
+            {
+                if (lines[beginLine].StartsWith("$end"))
+                {
+                    break;
+                }
+                else
+                {
+                    sb.AppendLine(lines[beginLine]);
+                }
+                beginLine++;
+            }
+            Debug.AssertFormat(beginLine <= lines.Length, "SNovel Phraser: can not find $end, $script line:{0}",
+                beginLine - 1
+            );
+            tagInfo.Params["script"] = sb.ToString();
+            CreateTag(tagInfo);
+            return beginLine;
+        }
+        void CreateTag(TagInfo tagInfo)
         {
             AbstractTag tag = TagFactory.Create(tagInfo, _currentPhraseLineNo);
             if (tag != null)
             {
-               // ScriptEngine.Instance.AddCommand(tag);
-               //_uploadTags.Add(tag);
-                _scenario.AddCommand(tag);
+                // ScriptEngine.Instance.AddCommand(tag);
+                //_uploadTags.Add(tag);
+                //  _scenario.AddCommand(tag);
+                _tags.Add(tag);
             }
             else
                 Debug.LogFormat("Tag:{0} is not implemented!", tagInfo.TagName);

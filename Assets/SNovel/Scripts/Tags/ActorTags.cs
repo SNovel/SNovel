@@ -29,22 +29,6 @@ namespace SNovel
                 default: //center by default
                     return Settings.Instance.Center_X;
             }
-            /*
-            switch (positionX)
-            {
-                case "center":
-                    return new Vector3(Settings.Center_X, y, z);
-                case "left":
-                    return new Vector3(Settings.Left_X, y, z);
-                case "right":
-                    return new Vector3(Settings.Right_X, y, z);
-                case "mid_left":
-                    return new Vector3(Settings.Mid_Left_X, y, z);
-                case "mid_right":
-                    return new Vector3(Settings.Mid_Right_X, y, z);
-                default: //center by default
-                    return new Vector3(Settings.Center_X, y, z);
-            }*/
         }
 
         static public float GetActorPositionY()
@@ -83,10 +67,10 @@ namespace SNovel
                 case "Far":
                     z = Settings.Instance.Far_Z;
                     break;
-                case "Near":
+                case "near":
                     z = Settings.Instance.Near_Z;
                     break;
-                case "Normal":
+                case "normal":
                     z = Settings.Instance.Normal_Z;
                     break;
                 default:
@@ -113,543 +97,182 @@ namespace SNovel
     }
 
     ///
-    /// tag = actor_new
+    /// tag = create_actor
     /// 
     /// <desc>
-    /// 预创建新的立绘, 默认为不激活状态
+    /// 预创建新的立绘, 默认为不激活状态，加载所有表情
     /// </desc>
     /// <params>
     /// @name:       立绘的文件名，是一个prefab
-    /// @objname:    创建的GameObject的名称，默认为文件名
-    /// @path:       立绘存放路径，"Resources/Actor/Image"下的相对路径
-    /// @pos:        立绘显示的水平位置, 是一个enum, 有以下五种：
-    ///              {center, left, right, mid_left, mid_right}
-    /// @z_pos:      立绘显示的纵向位置，及近和远
-    ///              {far, near, normal}
-    /// @scale:      立绘的扩大倍数，1为原始
+    /// @default:    默认立绘表情
     /// </params>
     /// 
     /// <sample>
-    /// [actor_new name=Sachi position=center]
+    /// [create_actor name=Sachi position=center]
     /// </sample>
     ///
 
-    public class Actor_newTag : AbstractTag
+    public class Create_actorTag : AbstractTag
     {
-        public Actor_newTag()
+        public Create_actorTag()
         {
-            _defaultParamSet = new Dictionary<string, string>()
+            _defaultParams = new Dictionary<string, string>()
             {
-                {"objname", ""},
                 {"name", ""},
-                {"path", ""},
-                //{ "x",       "0"        },
-                //{ "y",       "0"        },
-                //{ "z",       "0"        },
-                //{ "show",    "false"    },
-                //{ "fade",    "false"    },
-                //{ "fadetime","0"        },
-                //{ "pos",     "center"   },
-                //{ "z_pos",   "normal"   },
-                {"scale", "1"}
+                {"default", "default"},
             };
 
             _vitalParams = new List<string>()
             {
                 "name",
-                "path"
             };
         }
 
         public override void Excute()
         {
             Debug.LogFormat("Create Actor: {0}", Params["name"]);
-            //set objname
-            if (Params["objname"] == "")
+
+            GameObject prefab = Resources.Load<GameObject>(Settings.Instance.ACTOR_PATH + Params["name"]);
+            var go = GameObject.Instantiate(prefab);
+            var actor = go.GetComponent<ActorObject>();
+
+            go.name = Params["name"];
+            actor.Trans.SetParent(Settings.Instance.ActorRoot);
+            actor.Trans.localScale = new Vector3(1, 1, 1);
+            actor.Trans.anchoredPosition3D = new Vector3(0, 0, 0);
+            actor.Trans.anchorMin = Vector2.zero;
+            actor.Trans.anchorMax = Vector2.zero;
+            actor.gameObject.SetActive(false);
+            SceneManager.Instance.AddObject(Params["name"], actor);
+
+            var expId = actor.GetExpression(Params["default"]);
+            if (expId >= 0)
             {
-                Params["objname"] = Params["name"];
+                actor.CurImage.sprite = actor.ExpressionImages[expId];
+            }
+            else
+            {
+                Debug.LogErrorFormat("[Create Actor] Default Expression Wrong! Actor:{0}, Exp:{1}", Params["Name"],
+                                     Params["default"]);
             }
 
-            //set path
-            string path = Params["path"];
-            path = Settings.Instance.ACTOR_IMAGE_PATH + path;
-            Params["path"] = path;
-
-            //set position
-            /*
-            Vector3 pos = GetActorPosition(Params["pos"], Params["z_pos"]);
-            Params["x"] = pos.x.ToString();
-            Params["y"] = pos.y.ToString();
-            Params["z"] = pos.z.ToString();
-            */
-
-            ImageInfo info = new ImageInfo(Params);
-            //set position
-            // info.Position = new Vector2(Screen.width / 2,
-            //                           Screen.height / 2);
-
-            ActorObject ao = ImageManager.Instance.CreateObject<ActorObject, ImageInfo>(info);
-
-            //base.Excute();
         }
-
-
     }
 
     /// 
-    /// tag = enteractor
+    /// tag = expression
     /// 
     /// <desc>
-    /// 立绘出场
+    /// 改变立绘表情
     /// </desc>
     /// 
     /// <params>
-    /// @name:       the name of the actor
-    /// @pos:        立绘显示的水平位置, 是一个enum, 有以下五种, 默认为center
-    ///              {center, left, right, mid_left, mid_right}
-    /// @z_pos:      立绘显示的纵向位置，及近和远, 默认为normal
-    ///              {far, near, normal}   
-    /// @fade:       是否淡入
-    /// @fadetime:   淡入时间
+    /// @name:       立绘名
+    /// @type:       表情名称
     /// </params>
     /// 
     /// <sample>
-    /// [enteractor name=Sachi position=center fade=true]
+    /// [expression name=李维特 type=慌张]
     /// </sample>
-    ///
-    public class EnteractorTag : AbstractTag
+    /// 
+    public class ExpressionTag: AbstractTag
     {
-        public EnteractorTag()
+        public ExpressionTag()
         {
-            _defaultParamSet = new Dictionary<string, string>()
+
+            _defaultParams = new Dictionary<string, string>()
             {
                 {"name", ""},
-                {"fade", "false"},
-                {"fadetime", "0.5"},
+                {"type", ""},
+                {"fade", "0.1" }
+
+            };
+
+            _vitalParams = new List<string>()
+            {
+                "name",
+                "type"
+            };
+        }
+
+        public override void Excute()
+        {   
+            Debug.LogFormat("[expression name={0} type={1}]", Params["name"], Params["type"]);
+            var actor = SceneManager.Instance.GetObject<ActorObject>(Params["name"]);
+            float time = float.Parse(Params["fade"]);
+            if (time == 0)
+            {
+                actor.SetExpressionWithoutAnimation(Params["type"]);
+            }
+            else
+            {
+                Engine.Status.EnableNextCommand = false;
+
+                actor.SetExpressionWithAnimation(Params["type"], time, OnFinishAnimation);
+            }
+        }
+
+        public override void OnFinishAnimation()
+        {
+            Engine.Status.EnableNextCommand = true;
+        }
+    }
+
+    /// 
+    /// tag = show_actor
+    /// 
+    /// <desc>
+    /// 显示立绘
+    /// </desc>
+    /// 
+    /// <params>
+    /// @name:       立绘名
+    /// @pos:        立绘所在方位（left mid-left center mid_right right）
+    /// @fade:       淡入时间
+    /// @expression: 立绘表情
+    /// </params>
+    /// 
+    /// <sample>
+    /// [show_actor name=李维特 pos=left fade=0.5]
+    /// </sample>
+    /// 
+    public class Show_actorTag : AbstractTag
+    {
+        public Show_actorTag()
+        {
+
+            _defaultParams = new Dictionary<string, string>()
+            {
+                {"name", ""},
                 {"pos", "center"},
-                {"z_pos", "normal"},
-                {"scale", "1"}
+                {"fade", "0.5" },
+                {"expression", "default" }
             };
 
             _vitalParams = new List<string>()
             {
-                "name",
+                "name"
             };
         }
 
         public override void Excute()
         {
-            //base.Excute();
-
-            //actor name
-            string actorName = Params["name"];
-
-            Debug.LogFormat("Enter Actor: {0}", actorName);
-
-            //get actor
-            ActorObject ao = ImageManager.Instance.GetCreatedObject<ActorObject>(actorName);
-            if (ao == default(ActorObject))
-                return;
-
-            //     if(ao.IsEnterScene)
-            //     {
-            //          Engine.Status.EnableNextCommand = true;
-            //          Engine.NextCommand();
-            //          return;
-            //     }
-            ao.IsEnterScene = true;
-            ao.Go.SetActive(true);
-
-            Vector3 pos = ActorTagsUtility.GetActorPosition(Params["pos"], Params["z_pos"]);
-            ao.SetPosition2D(new Vector2(pos.x, pos.y));
-            ao.SetScale(float.Parse(Params["scale"]));
-            //ao.SetPosition3D(pos);
-            ao.OnAnimationFinish = OnFinishAnimation;
-
-            float time = float.Parse(Params["fadetime"]);
-
-
-            if (Params["fade"] == "true")
-            {
-                Engine.Status.EnableNextCommand = false;
-                ao.FadeIn(time);
-            }
-            else
-            {
-                ao.FadeIn(0);
-                OnFinishAnimation();
-            }
-        }
-
-
-
-        public override void OnFinishAnimation()
-        {
-            //  if (Params["fade"] == "true")
-            //  {
-            Debug.Log("Finish Animation!");
-            Engine.Status.EnableNextCommand = true;
-            Engine.NextCommand();
-            //   }
-        }
-
-        public override void After()
-        {
-            //base.After();
-        }
-    }
-
-    /// 
-    /// tag = exitactor
-    /// 
-    /// <desc>
-    /// 立绘淡出
-    /// </desc>
-    /// 
-    /// <params>
-    /// @name:       the name of the actor
-    /// @fade:       是否淡出
-    /// @fadetime:   淡出时间
-    /// </params>
-    /// 
-    /// <sample>
-    /// [exitactor name=Sachi fade=true]
-    /// </sample>
-    /// 
-    public class ExitactorTag : AbstractTag
-    {
-        public ExitactorTag()
-        {
-            _defaultParamSet = new Dictionary<string, string>()
-            {
-                {"name", ""},
-                {"fade", "true"},
-                {"fadetime", "0.5"},
-            };
-
-            _vitalParams = new List<string>()
-            {
-                "name",
-            };
-        }
-
-        public override void Excute()
-        {
-            //base.Excute();
-
-            //actor name
-            string actorName = Params["name"];
-
-            Debug.LogFormat("Exit Actor: {0}", actorName);
-
-            //get actor
-            ActorObject ao = ImageManager.Instance.GetCreatedObject<ActorObject>(actorName);
-            if (ao == null)
-            {
-                Debug.LogErrorFormat("Can not find actor to exit:{0}", actorName);
-            }
-            bool isFade = bool.Parse(Params["fade"]);
-
-
-            // ao.OnAnimationFinish = OnFinishAnimation;
-
-            float time = float.Parse(Params["fadetime"]);
-
-            ao.OnAnimationFinish = OnFinishAnimation;
-            ao.IsEnterScene = false;
-            if (isFade == true)
-            {
-                Engine.Status.EnableNextCommand = false;
-
-                ao.FadeOut(time);
-            }
-            else
-            {
-                ao.FadeOut(0);
-            }
-        }
-
-
-
-        public override void OnFinishAnimation()
-        {
-
-            Debug.Log("Finish Animation!");
-            Engine.Status.EnableNextCommand = true;
-            Engine.NextCommand();
-
-        }
-
-        public override void After()
-        {
-            //base.After();
-        }
-    }
-    /// 
-    /// tag = fadein
-    /// 
-    /// <desc>
-    /// 立绘淡出
-    /// </desc>
-    /// 
-    /// <params>
-    /// @name:       the name of the actor
-    /// @fadetime:   淡出时间
-    /// </params>
-    /// 
-    /// <sample>
-    /// [exitactor name=Sachi fadetime=0.5]
-    /// </sample>
-    /// 
-    public class FadeinTag : AbstractTag
-    {
-        public FadeinTag()
-        {
-            _defaultParamSet = new Dictionary<string, string>()
-            {
-                {"name", ""},
-                {"fadetime", "0.5"},
-            };
-
-            _vitalParams = new List<string>()
-            {
-                "name",
-            };
-        }
-
-        public override void Excute()
-        {
-            //base.Excute();
-
-            //actor name
-            string actorName = Params["name"];
-
-            Debug.LogFormat("Fade Out: {0}", actorName);
-
-            //get actor
-            ActorObject ao = ImageManager.Instance.GetCreatedObject<ActorObject>(actorName);
-            if (ao == null)
-            {
-                Debug.LogErrorFormat("Can not find actor to fade:{0}", actorName);
-            }
-
-
-            // ao.OnAnimationFinish = OnFinishAnimation;
-
-            float time = float.Parse(Params["fadetime"]);
-
-            ao.OnAnimationFinish = OnFinishAnimation;
-            ao.IsEnterScene = false;
-            //if (time - 0f > float.Epsilon)
-            //{
-            Engine.Status.EnableNextCommand = false;
-
-            ao.FadeIn(time);
-            // }
-            // else
-            // {
-            //     Engine.Status.EnableNextCommand = false;
-
-            //    ao.FadeIn(0f);
-            //  }
-        }
-
-
-
-        public override void OnFinishAnimation()
-        {
-
-            Debug.Log("Finish Animation!");
-            Engine.Status.EnableNextCommand = true;
-            Engine.NextCommand();
-
-        }
-
-        public override void After()
-        {
-           // base.After();
-        }
-    }
-
-    /// 
-    /// tag = fadeout
-    /// 
-    /// <desc>
-    /// 立绘淡出
-    /// </desc>
-    /// 
-    /// <params>
-    /// @name:       the name of the actor
-    /// @fadetime:   淡出时间
-    /// </params>
-    /// 
-    /// <sample>
-    /// [fadeout name=Sachi fadetime=0.5]
-    /// </sample>
-    /// 
-    public class FadeoutTag : AbstractTag
-    {
-        public FadeoutTag()
-        {
-            _defaultParamSet = new Dictionary<string, string>()
-            {
-                {"name", ""},
-                {"fadetime", "0"},
-            };
-
-            _vitalParams = new List<string>()
-            {
-                "name",
-            };
-        }
-
-        public override void Excute()
-        {
-            //base.Excute();
-
-            //actor name
-            string actorName = Params["name"];
-
-            Debug.LogFormat("Exit Actor: {0}", actorName);
-
-            //get actor
-            ActorObject ao = ImageManager.Instance.GetCreatedObject<ActorObject>(actorName);
-            if (ao == null)
-            {
-                Debug.LogErrorFormat("Can not find actor to fade:{0}", actorName);
-            }
-            // ao.OnAnimationFinish = OnFinishAnimation;
-
-            float time = float.Parse(Params["fadetime"]);
-
-            ao.OnAnimationFinish = OnFinishAnimation;
-            ao.IsEnterScene = false;
-            // if (time - 0f > float.Epsilon)
-            // {
-            Engine.Status.EnableNextCommand = false;
-
-            ao.FadeOut(time);
-            // }
-            //  else
-            //  {
-            //      ao.FadeOut(0);
-            // }
-        }
-
-
-
-        public override void OnFinishAnimation()
-        {
-
-            Debug.Log("Finish Animation!");
-            Engine.Status.EnableNextCommand = true;
-            Engine.NextCommand();
-
-        }
-
-        public override void After()
-        {
-            //base.After();
-        }
-    }
-    /// 
-    /// tag = moveactor
-    /// 
-    /// <desc>
-    /// 移动立绘
-    /// 从当前位置移动到指定位置
-    /// </desc>
-    /// 
-    /// <params>
-    /// @name:       the name of the actor
-    /// @pos:        立绘显示的水平位置, 是一个enum, 有以下五种, 默认为center
-    ///              {center, left, right, mid_left, mid_right}
-    /// @z_pos:      立绘显示的纵向位置，及近和远, 默认为normal
-    ///              {far, near, normal}   
-    /// @time:       移动的时间             
-    /// @scale:      立绘的大小 倍数
-    /// </params>
-    /// 
-    /// <sample>
-    /// [moveactor name=Maki pos=left]
-    /// </sample>
-    /// 
-    public class MoveactorTag : AbstractTag
-    {
-        public MoveactorTag()
-        {
-
-            _defaultParamSet = new Dictionary<string, string>()
-            {
-                {"name", ""},
-                {"pos", ""},
-                {"z_pos", ""},
-                {"time", "1"},
-                {"scale", "1"}
-            };
-
-            _vitalParams = new List<string>()
-            {
-                "name",
-            };
-        }
-
-        public override void Excute()
-        {
-            //base.Excute();
-
-            //actor name
-            string actorName = Params["name"];
-
-            Debug.LogFormat("Move Actor: {0}", actorName);
-
-            //get actor
-            ActorObject ao = ImageManager.Instance.GetCreatedObject<ActorObject>(actorName);
-            if (ao == default(ActorObject))
-                return;
-
-            ao.Go.SetActive(true);
-
-            float time = float.Parse(Params["time"]);
-
-            bool isAnim = false;
-            if (Params["pos"] != "")
-            {
-                isAnim = true;
-                float x_move = ActorTagsUtility.GetActorPositionX(Params["pos"]);
-                float y = ActorTagsUtility.GetActorPositionY();
-                ao.MoveTo(new Vector2(x_move, y), time);
-            }
-            // Vector3 pos = ActorTagsUtility.GetActorPosition(Params["pos"],Params["z_pos"]);
-            if (Params["z_pos"] != "")
-            {
-                isAnim = true;
-                float z_scale = ActorTagsUtility.GetActorPositionZ(Params["z_pos"]);
-                ao.ScaleTo(z_scale, time);
-            }
-
-            if (isAnim)
-            {
-                ao.OnAnimationFinish = OnFinishAnimation;
-            }
+            Debug.LogFormat("[show_actor] name={0}", Params["name"]);
+            var actor = SceneManager.Instance.GetObject<ActorObject>(Params["name"]);
+           
+            actor.gameObject.SetActive(true);
+            actor.Trans.anchoredPosition = ActorTagsUtility.GetActorPosition(Params["pos"], "normal");
 
             Engine.Status.EnableNextCommand = false;
-        }
+            
+            actor.SetExpressionWithoutAnimation(Params["expression"]);
 
+            actor.FadeIn(float.Parse(Params["fade"]), OnFinishAnimation);
+        }
 
         public override void OnFinishAnimation()
         {
-            //   if (Params["fade"] == "true")
-            //   {
-            Debug.Log("Move Finish!");
             Engine.Status.EnableNextCommand = true;
-            Engine.NextCommand();
-            //   }
-        }
-
-        public override void After()
-        {
-            //base.After();
         }
     }
 }

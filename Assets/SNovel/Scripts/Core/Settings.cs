@@ -28,52 +28,43 @@ namespace SNovel
             {
                 if(_sharedSettings == null)
                 {
-                    GameObject go = new GameObject("Setting");
-                    _sharedSettings = go.AddComponent<Settings>();
-                    if(_sharedSettings == null)
-                    {
-                        Debug.LogError("Cannot create Settings");
-                    }
+                     Debug.LogError("SNovel: No Settings ");
                 }
                 return _sharedSettings;
             }
         }
-        public string SCENARIO_SCRIPT_PATH   = "/ThirdParty/Resources/ScenarioScripts/";
-        public string PREFAB_PATH            = "Prefab/";
-        public string UI_IMAGE_PATH          = "UImage/";
-        public string BG_IMAGE_PATH          = "BG/";
-        public string ACTOR_IMAGE_PATH       = "Actor/Image/";
-
-        public string UI_ROOT_IN_SCENE       = "UICanvas";
-        public string ACTOR_ROOT_IN_SCENE    = "ActorCanvas";
-        public string BG_ROOT_IN_SCENE       = "BGCanvas";
+        public string SCENARIO_SCRIPT_PATH   = "SNovel/ScenarioScripts/";
+        public string PREFAB_PATH            = "SNovel/Prefab/";
+        public string UI_PATH = "SNovel/UImage/";
+        public string IMAGE_PATH = "SNovel/Image/";
+        public string BG_PATH          = "SNovel/BG/";
+        public string ACTOR_PATH       = "SNovel/Actor/";
+        public string TEXBOX_PATH            = "SNovel/TextBox/";
 
         public int UI_LAYER = 5;
         public int ACTOR_LAYER = 9;
         public int BG_LAYER = 8;
-        
-        public int PreferredScreenWidth  = 750;
-        public int PreferredScreenHeight = 1334;
-      //  [Serializable]
-       // static public class ActorSettings
-      //  {
-            [Range(0, 1080)]
+
+        //  [Serializable]
+        // static public class ActorSettings
+        //  {
+        [Range(0, 1920)]
             public float Actor_Y = 0f;
             
-            [Range(0, 1920)]
+            [Range(0, 1080)]
             public float Center_X = 0f;
 
-            [Range(0, 1920)]
+            [Range(0, 1080)]
             public float Left_X = 0f;
 
-            [Range(0, 1920)]
+            [Range(0, 1080)]
             public float Right_X = 0f;
 
-            [Range(0, 1920)]
+            [Range(0, 1080)]
             public float Mid_Left_X = 0f;
 
             // [Range(-Screen.width / 2, Screen.width)]
-            [Range(0, 1920)]
+            [Range(0, 1080)]
             public float Mid_Right_X = 0f;
 
             [Range(0, 2)]
@@ -86,61 +77,12 @@ namespace SNovel
             public float Normal_Z = 0f;
       //  }
 
-        public static Transform UIRoot
-        {
-            get
-            {
-                if (_uiRoot == null)
-                {
-                    GameObject go = GameObject.Find(Settings.Instance.UI_ROOT_IN_SCENE);
-                    if (go == null)
-                    {
-                        Debug.Log("Can not find UICanvas, create it in Scene!");
-                        return null;
-                    }
-                    _uiRoot = go.transform;
-                }
-                return _uiRoot;
-            }
-        }
-        static Transform _uiRoot = null;
+        public Transform UIRoot;
 
-        public static Transform BGRoot
-        {
-            get
-            {
-                if (_bgRoot == null)
-                {
-                    GameObject go = GameObject.Find(Settings.Instance.BG_ROOT_IN_SCENE);
-                    if (go == null)
-                    {
-                        Debug.Log("Can not find BGCanvas, create it in Scene!");
-                        return null;
-                    }
-                    _bgRoot = go.transform;
-                }
-                return _bgRoot;
-            }
-        }
-        static Transform _bgRoot = null;
+        public Transform BGRoot;
 
-        public static Transform ActorRoot
-        {
-            get
-            {
-                if (_actorRoot == null)
-                {
-                    GameObject go = GameObject.Find(Settings.Instance.ACTOR_ROOT_IN_SCENE);
-                    if (go == null)
-                    {
-                        Debug.Log("Can not find ActorCanvas, create it in Scene!");
-                        return null;
-                    }
-                    _actorRoot = go.transform;
-                }
-                return _actorRoot;
-            }
-        }
-        static Transform _actorRoot = null;
+        public Transform ActorRoot;
+
+        public GameObject Root;
     }
 }

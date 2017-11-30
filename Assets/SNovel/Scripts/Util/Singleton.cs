@@ -13,7 +13,7 @@
 
 using UnityEngine;
 
-namespace Utilities
+namespace SNovel
 {
 
     /// <summary>

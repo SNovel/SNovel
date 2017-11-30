@@ -1,0 +1,26 @@
+
+[create_textbox name=Dos]  //创建资源，只是缓存了一下prefab但不显示
+[show name=Dos x=540 y=30] //显示文本框
+[current name=Dos type=main]//设置当前显示文字的文本框为Dos
+
+[button prefabName=Button name=chapter_scene_1 text=changeText onClick=changeText x=540 y=860]
+[button prefabName=Button name=chapter_scene_2 text=nextStage onClick=nextStage x=540 y=1060]
+[s]
+
+[block name=changeText]
+执行Block：changeText[r]
+[block_end]
+
+[block name=nextStage]
+[clear_all]
+[create_textbox name=Dos]  //创建资源，只是缓存了一下prefab但不显示
+[show name=Dos x=540 y=900] //显示文本框
+[current name=Dos type=main]//设置当前显示文字的文本框为Dos
+你好[r]
+你好[r]
+你好[r]
+你好[r]
+你好[r]
+你好[r]
+
+[block_end]

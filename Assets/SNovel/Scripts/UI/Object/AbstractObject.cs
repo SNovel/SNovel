@@ -8,8 +8,8 @@ namespace SNovel
 {
     public abstract class ObjectInfo
     {
-        public string Name = "";
-        public string ObjName = "";
+        //带读取的文件名称
+        public string AssetName = "";
     }
 
     /*
@@ -18,18 +18,22 @@ namespace SNovel
      * 引擎通过这个创建UI元素
      * 
      */
-    public class AbstractObject
+    public class AbstractObject:MonoBehaviour
     {
-        /*
-         * 定义元素的位置
-         */
-        public AbstractObject()
+       // public GameObject Go;
+        [HideInInspector]
+        public RectTransform Trans
         {
-
+            get
+            {
+                if (_trans == null)
+                    _trans = GetComponent<RectTransform>();
+                return _trans;
+            }
+            
         }
 
-
-        public GameObject Go;
+        private RectTransform _trans = null;
 
         public Action OnAnimationFinish
         {
@@ -37,47 +41,34 @@ namespace SNovel
             set;
         }
 
-        //attach gameobject in scene
-        public virtual void Init(string objName)
-        {
-            //create Object
-            Go = GameObject.Find(objName);
-            if (Go == null)
-            {
-                Debug.LogFormat("Cannot find object:{0}", objName);
-                return;
-            }
-        }
-
-        public virtual void Init(ObjectInfo info)
-        {
-            //create Object
-
-        }
-
         public virtual void SetPosition3D(float x, float y, float z)
         {
-           
-            Go.transform.position = new Vector3(x, y, z);
+            Trans.position = new Vector3(x, y, z);
         }
 
         public virtual void SetPosition3D(Vector3 p)
         {
-            Go.transform.position = p;
+            Trans.position = p;
         }
-
-        public virtual void SetPosition2D(float x, float y)
-        {
-            Vector3 v3 = Go.transform.position;
-            Go.transform.position = new Vector3(x, y, v3.z);
-        }
-
         public virtual void SetPosition2D(Vector2 p)
         {
-            Vector3 v3 = Go.transform.position;
-            Go.transform.position = new Vector3(p.x, p.y, v3.z);
+            Trans.anchoredPosition = p;
+        }
+        public virtual void SetPosition2D(float x, float y)
+        {
+            Trans.anchoredPosition = new Vector2(x, y);
         }
 
+        public virtual void SetPositionX(float x)
+        {
+            var p = Trans.anchoredPosition;
+           Trans.anchoredPosition = new Vector2(x, p.y);
+        }
+        public virtual void SetPositionY(float y)
+        {
+            var p = Trans.anchoredPosition;
+            Trans.anchoredPosition = new Vector2(p.x, y);
+        }
         public virtual void SetParent(string name)
         {
             GameObject p =  GameObject.Find(name);
@@ -86,15 +77,8 @@ namespace SNovel
                 Debug.LogFormat("Can not find Parent:{0}", name);
                 return;
             }
-            Go.transform.SetParent(p.transform);
+            Trans.SetParent(p.transform);
         }
-        public virtual void FadeIn(float fadetime)
-        {
 
-        }
-        public virtual void FadeOut(float fadetime)
-        {
-
-        }
     }
 }

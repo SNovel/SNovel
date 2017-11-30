@@ -3,131 +3,93 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace SNovel
 {
     /*
-     * tag = image_change
-     * 
-     * <desc>
-     * 更换GameObject的图片
-     * 
-     * <param>
-     * @name:       图片名称
-     * @objname:    GameObject的name, 全部小写
-     * @path:       文件在"Resources/"下的相对路径
-     * @fade:       是否渐变显示
-     * @fadetime:   渐变时间
-     * 
-     * <sample>
-     * [image_change name=background path=room_tall fade=true]
-     */
-
-    class Image_changeTag: AbstractTag
-    {
-        public Image_changeTag()
-        {
-            _defaultParamSet = new Dictionary<string, string>() {
-                { "objname",    ""},
-                { "name",       "" },
-                { "path",    "" },
-                { "fade",       "false" },
-                { "fadetime",   "0.5" } 
-            };
-            _vitalParams = new List<string>() {
-                "name",
-                "objname",
-                "path"
-            };
-        }
-
-        public override void Excute()
-        {
-            string objName = Params["objname"];
-            string path = Params["path"] + Params["name"];
-            Engine.Status.EnableNextCommand = false;
-
-            //ImageObject io = ImageManager.Instance.GetImageObjectInScene(objName);
-            //ImageObject io = ImageManager.Instance.GetObjectInScene<ImageObject>(objName);
-            ImageObject io = ImageManager.Instance.GetObjectInScene<ImageObject>(objName);
-            io.OnAnimationFinish = OnFinishAnimation;
-            if (Params["fade"] == "true")
-            {
-                //等待动画结束函数回调继续执行
-                Engine.Status.EnableNextCommand = false;
-            }
-            else
-            {
-                Engine.Status.EnableNextCommand = true;
-            }
-            io.ChangeImage(path,
-                    float.Parse(Params["fadetime"]));
-
-            base.Excute();
-
-        }
-        public override void After()
-        {
-            //base.After();
-        }
-        public override void OnFinishAnimation()
-        {
-            if (Params["fade"] == "true")
-            {
-                Debug.Log("Finish Animation!");
-                Engine.Status.EnableNextCommand = true;
-                Engine.NextCommand();
-            }
-        }
-    }
-
-    /*
-     * tag = image_new
+     * tag = create_image
      * 
      * <desc>
      * 预创建新的图片
      * 
      * <param>
-     * @objname:    GameObject Name
      * @name:       File name
-     * @path:       Relative Path To the "/Resources/"
-     * @x,y,z:      position of the image to set
-     * //@show:       show immediately?
-     * 
+     * @blockTouch: 是否屏蔽位于其后的触摸事件
+     * @alpha:透明度
+     * @nativeSize: 是否设置图片原始大小
+     * @width， height ： 手动设置的图像大小
      * <sample>
-     * [image_new name=sachi path=actor/]
+     * [create_image name=sachi blockTouch=true]
      */
-    public class Image_newTag: AbstractTag
+    public class Create_imageTag: AbstractTag
     {
-        public Image_newTag()
+        public Create_imageTag()
         {
-            _defaultParamSet = new Dictionary<string,string>() {
-                { "objname", "new_image"},
-                { "name",    ""         },
-                { "path",    ""         },
-                { "x",       "0"        },
-                { "y",       "0"        },
-                { "z",       "0"        },
-                { "scale",   "1"        },
-               // { "show",    "false"    },
-               // { "fade",    "false"    },
-               // { "fadetime","0"        },
+            _defaultParams = new Dictionary<string,string>() {
+                { "name",    "null"         },
+                {"blockTouch","false" },
+                {"alpha", "1" },
+                {"nativeSize", "true" },
+                {"width","100" },
+                {"height","100" }
             };
 
             _vitalParams = new List<string>() {
-                "name",
-                "path"
             };
         }
 
         public override void Excute()
         {
-            ImageInfo info = new ImageInfo(Params);
-            //ImageObject io = ImageManager.Instance.CreateImage(info);
-            //ImageObject io = ImageManager.Instance.CreateObject<ImageObject, ImageInfo>(info);
-            ImageObject io = ImageManager.Instance.CreateObject<ImageObject, ImageInfo>(info);
-           // Instances.Instance.ImageManager.CreateImage()
-            base.Excute();
+
+            //把创建prefab实例的操作放到这里来
+            var prefab = Resources.Load<GameObject>(Settings.Instance.PREFAB_PATH + "ImageObject");
+            var go = GameObject.Instantiate(prefab);
+            if (go == null)
+            {
+                Debug.LogErrorFormat("Can not load prefab ImageObject in {0}", Settings.Instance.PREFAB_PATH + "ImageObject");
+                return;
+            }
+            var obj = go.GetComponent<ImageObject>();
+
+            obj.gameObject.layer = Settings.Instance.BG_LAYER;
+            obj.gameObject.name = Params["name"];
+            //add Image
+            var image = go.GetComponent<Image>();
+            if (Params["name"] != "null")
+            {
+                Sprite sp = Resources.Load<Sprite>(Settings.Instance.IMAGE_PATH + Params["name"]);
+
+                if (sp == null)
+                {
+                    Debug.LogWarningFormat("Image: {0} not found", Settings.Instance.IMAGE_PATH + Params["name"]);
+                    //Debug.LogErrorFormat("Image: {0} not found", Settings.Instance.IMAGE_PATH + Params["name"]);
+                    return;
+                }
+                image.sprite = sp;
+            }
+            if (bool.Parse(Params["nativeSize"]))
+            {
+                image.SetNativeSize();
+            }
+            else
+            {
+                obj.Trans.sizeDelta = new Vector2(float.Parse(Params["width"]), float.Parse(Params["height"]));
+            }
+            image.color = new Color(1,1,1,float.Parse(Params["alpha"]));
+            image.raycastTarget = bool.Parse(Params["blockTouch"]);
+            //set local position
+            obj.Trans.anchorMin = Vector2.zero;
+            obj.Trans.anchorMax = Vector2.zero;
+            //set parent
+            obj.Trans.SetParent(Settings.Instance.BGRoot, true);
+            obj.Trans.localScale = new Vector3(1,1,1);
+            obj.Trans.anchoredPosition3D = new Vector3(0, 0, 0);
+
+            go.SetActive(false);
+
+            SceneManager.Instance.AddObject(Params["name"], obj);
+            // Instances.Instance.ImageManager.CreateImage()
         }
     }
 

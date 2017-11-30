@@ -3,85 +3,90 @@ using System.IO;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using System.Collections;
+using System.Linq;
 
 namespace SNovel
 {
-    /*
-     * 一个场景类
-     * 一个游戏中可以有多个场景但是运行中的只有一个
-     * 压栈
-     */
-
-    public class Scene
+    public class SceneStatus
     {
-        public class SceneStatus
-        {
-            public bool SkipThisTag
-            {
-                get;
-                internal set;
-            }
-
-            public bool EnableClickContinue
-            {
-                get;
-                internal set;
-            }
-
-            public bool EnableNextCommand
-            {
-                get;
-                internal set;
-            }
-
-            public bool IsFinish
-            {
-                get;
-                set;
-            }
-
-            public SceneStatus()
-            {
-                Reset();
-            }
-
-            internal void Reset()
-            {
-                //Status reset
-                EnableClickContinue = true;
-                EnableNextCommand = true;
-                SkipThisTag = false;
-                IsFinish = false;
-            }
-
-            
-        }
-
-        public SceneStatus Status;
-
-        public string Name
-        {
-            get;
-            set;
-        }
-        public List<AbstractTag> Tags
-        {
-            get;
-            set;
-        }
-
         public int CurrentLine
         {
             get;
             set;
         }
-
+        /*
         public string CurrentScenario
         {
             get;
             private set;
         }
 
+        public bool SkipThisTag
+        {
+            get;
+            internal set;
+        }*/
+
+        //当需要点击继续的时候为true，其余为false
+        public bool EnableClickContinue
+        {
+            get;
+            internal set;
+        }
+
+        //停止，收到消息为true时再继续
+        public bool EnableNextCommand
+        {
+            get;
+            internal set;
+        }
+
+        public bool IsFinish
+        {
+            get;
+            set;
+        }
+
+        public SceneStatus()
+        {
+            Reset();
+        }
+
+        internal void Reset()
+        {
+            //Status reset
+            EnableClickContinue = true;
+            EnableNextCommand = true;
+           // SkipThisTag = false;
+            IsFinish = false;
+            CurrentLine = 0;
+        }
+
+
+    }
+    public class Block
+    {
+        //开始的行号 对应脚本中
+        public int StartLine;
+        public int EndLine;
+        public SceneStatus Status = new SceneStatus();
+
+        //树
+        public Dictionary<string, Block> BlockDict = new Dictionary<string, Block>();
+
+        //块的名字 对应Lable的name
+        public string Name;
+        public List<AbstractTag> Tags = new List<AbstractTag>();
+    }
+    /*
+     * 一个场景类
+     * 一个游戏中可以有多个场景但是运行中的只有一个
+     * 压栈
+     */
+
+    public class Scene: Block 
+    {
         public string ScriptFilePath
         {
             get;
@@ -103,7 +108,7 @@ namespace SNovel
             get;
             set;
         }
-        ScriptEngine _engine;
+       // ScriptEngine _engine;
 
 
         public Scene(string scriptPath) :
@@ -127,17 +132,17 @@ namespace SNovel
             Status = new SceneStatus();
             ScriptFilePath = "";
             ScriptContent = "";
-            CurrentLine = 0;
+            Status.CurrentLine = 0;
 
             ScenarioDict = new Dictionary<string, int>();
-            _engine = ScriptEngine.Instance;
+           // _engine = ScriptEngine.Instance;
             IsPhraseFinish = false;
             OnFinish = () => { };
         }
 
         public void Reset()
         {
-            CurrentLine = 0;
+            Status.CurrentLine = 0;
             Status.Reset();
         }
 
@@ -156,7 +161,7 @@ namespace SNovel
             sr.Close();
 #endif
 */
-            ScriptFilePath = ScriptFilePath.Substring(0, 3);
+            //ScriptFilePath = ScriptFilePath.Substring(0, 3);
             //#if UNITY_ANDROID
             
                 var textAsset = Resources.Load<TextAsset>(path);
@@ -191,7 +196,8 @@ namespace SNovel
             //#endif
             // ScriptContent= 
             //_phraser.SetScript(str);*/
-            _engine.Phrase(this);
+            //  _engine.Phrase(this);
+            Phrase();
         }
 
         public void LoadScriptAsync()
@@ -223,47 +229,73 @@ namespace SNovel
             Thread thread = new Thread(
                 () =>
                 {
-                    _engine.Phrase(this);
+                    Phrase();
                     PhraseFinish();
                 });
             thread.Start();
         }
-        public void AddCommand(AbstractTag tag)
+        private Stack<AbstractTag> _tagStack = new Stack<AbstractTag>();
+        
+        public void Phrase()
         {
-            //tag.LineNo = _opTags.Count;
-            tag.Engine = _engine;
-            if (tag.Name == "scenario")
+            var phraser = new KAGPhraser();
+            var tags = phraser.Phrase(ScriptContent);
+            var curBlock = this as Block;
+            curBlock.StartLine = 0;
+            PhraseBlock(tags, curBlock, 0, tags.Count - 1);
+        }
+
+        void PhraseBlock(List<AbstractTag> tags, Block curBlock, int startLine, int endLine)
+        {
+            for (int i = startLine; i <= endLine; ++i)
             {
-                AddScenario(tag);
+                var tag = tags[i];
+                //tag.LineNo = _opTags.Count;
+                tag.Engine = ScriptEngine.Instance;
+
+                if (tag.Name == "block")
+                {
+                    //find block_end
+                    int endBlockIdx = -1;
+                    for (int findEndBlockIdx = i + 1; findEndBlockIdx <= endLine; ++findEndBlockIdx)
+                    {
+                        if (tags[findEndBlockIdx].Name == "block_end")
+                        {
+                            endBlockIdx = findEndBlockIdx;
+                            break;
+                        }
+                    }
+                    if (endBlockIdx == -1)
+                    {
+                        Debug.LogErrorFormat("do not find block_end in script:{0}, tag:{1} ", Name, tag.ToString());
+                        return;
+                    }
+
+                    var block = new Block();
+                    block.Name = tag.Params["name"];
+                    block.StartLine = i;
+                    block.Tags.Add(tag);
+                    curBlock.BlockDict.Add(block.Name, block);
+                    PhraseBlock(tags, block, i+1, endBlockIdx);
+                }
+                else
+                {
+                    curBlock.Tags.Add(tag);
+                }
+            }
+        }
+        public Block GetBlock(string name)
+        {
+            if(BlockDict.ContainsKey(name))
+            {
+                return BlockDict[name];
             }
             else
-                Tags.Add(tag);
-        }
-
-
-        private void AddScenario(AbstractTag tag)
-        {
-            string scenarioName = tag.Params["scenario"];
-
-            if (ScenarioDict.ContainsKey(scenarioName))
             {
-                Debug.LogFormat("Scenario: {0}Is Already Exist", scenarioName);
-                return;
+                Debug.LogErrorFormat("can not find block:{0} in scene:{1}", name, Name);
             }
-            else
-            {
-                ScenarioDict.Add(scenarioName, GetLastedTagLineNo());
-                Debug.LogFormat("[Add Scenario]{0}:{1}", GetLastedTagLineNo(), scenarioName);
-                CurrentScenario = scenarioName;
-            }
+            return null;
         }
-
-        int GetLastedTagLineNo()
-        {
-            return Tags.Count;
-        }
-
         public Action OnFinish;
-
     }
 }

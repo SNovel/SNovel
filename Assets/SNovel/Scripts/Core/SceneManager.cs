@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+
 namespace SNovel
 {
     public class SceneManager
@@ -21,35 +22,53 @@ namespace SNovel
 
         SceneManager()
         {
-            _objectInScene = new Dictionary<string, AbstractObject>();
+            _cachedObject = new Dictionary<string, AbstractObject>();
         }
 
-        Dictionary<string, AbstractObject> _objectInScene;
+        Dictionary<string, AbstractObject> _cachedObject;
 
-        public TObject CreateObject<TObject, TInfo>(TInfo info)
-            where TObject: AbstractObject, new()
-            where TInfo:   ObjectInfo
+        public TextBoxObject CurrentMainTextBox
         {
-            TObject obj = new TObject();
-            obj.Init(info);
-
-            _objectInScene.Add(info.Name, obj);
-            return obj;
-
+            get;
+            set;
         }
 
-        public TObject GetCreatedObject<TObject>(string name)
+        public TextBoxObject CurrentNameTextBox
+        {
+            get;
+            set;
+        }
+
+        public TObject AddObject<TObject>(string name, TObject obj)
             where TObject: AbstractObject
         {
-            if (!_objectInScene.ContainsKey(name))
-                return default(TObject);
+            _cachedObject.Add(name, obj);
+            return obj;
+        }
+        /*
+        public TObject CreateObject<TObject>(string prefabName)
+            where TObject: AbstractObject, new()
+        {
+            TObject obj = new TObject();
+            obj.Init(prefabName);
+
+            _cachedObject.Add(prefabName, obj);
+            obj.Go.name = prefabName;
+            return obj;
+        }
+        */
+        public TObject GetObject<TObject>(string name)
+            where TObject: AbstractObject
+        {
+            if (!_cachedObject.ContainsKey(name))
+                return null;
             else
             {
-                AbstractObject ao = _objectInScene[name];
-                return (TObject)ao;
+                AbstractObject ao = _cachedObject[name];
+                return (TObject) ao;
             }
         }
-
+        /*
         public TObject GetObjectInScene<TObject>(string objName)
                 where TObject : AbstractObject, new()
         {
@@ -66,5 +85,28 @@ namespace SNovel
                 return ao;
             }
         }
+        */
+        public void Clear()
+        {
+            foreach (var obj in _cachedObject)
+            {
+                GameObject.Destroy(obj.Value.gameObject);
+            }
+            _cachedObject.Clear();
+
+        }
+        public GameObject Root
+        {
+            get
+            {
+                if (_root == null)
+                {
+                    _root = Settings.Instance.Root;
+                }
+                return _root;
+            }
+        } 
+
+        private GameObject _root= null;
     }
 }

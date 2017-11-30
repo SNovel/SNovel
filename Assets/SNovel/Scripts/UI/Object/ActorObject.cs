@@ -8,130 +8,82 @@ using DG.Tweening;
 
 namespace SNovel
 {
-    class ActorObject: AbstractObject
+    //TODO
+    [RequireComponent(typeof(Image))]
+    public class ActorObject: ImageObject
     {
-        public bool IsEnterScene
+        public List<string> ExpressionNames;
+        public List<Sprite> ExpressionImages;
+
+        public int ExpressionCount
         {
-            get;
-            set;
-        }
-        string ActorPrefabPath = Settings.Instance.PREFAB_PATH + "Image";
-
-        Image _image;
-
-        RectTransform _transform;
-        public ActorObject(): base()
-        { 
-           
+            get { return ExpressionNames.Count; }
         }
 
-        public override void Init(ObjectInfo infoo)
+        public int GetExpression(string name)
         {
-            ImageInfo info = (ImageInfo)infoo;
-            //load image
-            GameObject go = Resources.Load<GameObject>(Settings.Instance.PREFAB_PATH + "Image");
-            go = GameObject.Instantiate(go);
-            
-            //set tag
-
-            go.layer = Settings.Instance.ACTOR_LAYER;
-
-            //set name
-            go.name = info.ObjName;
-
-            //add Image
-            _image = go.GetComponent<Image>();
-            Sprite sp = Resources.Load<Sprite>(info.Path + info.Name);
-
-            if (sp)
+            int idx = -1;
+            for (int i = 0; i < ExpressionNames.Count; ++i)
             {
-                _image.sprite = sp;
-                _image.SetNativeSize();
+                if (ExpressionNames[i] == name)
+                {
+                    idx = i;
+                    break;
+                }
+            }
+            return idx;
+        }
+
+        public void SetExpressionWithoutAnimation(string name)
+        {
+            var idx = GetExpression(name);
+            if (idx >= 0)
+            {
+                CurImage.sprite = ExpressionImages[idx];
             }
             else
             {
-                Debug.LogFormat("Actor: {0} not found", info.Path + info.Name);
+                Debug.LogErrorFormat("Can not set expression!Actor:{0} Expression:{1}", gameObject.name, name);
             }
-
-            _transform = go.GetComponent<RectTransform>();
-
-            //set local position
-            _transform.anchorMin = Vector2.zero;
-            _transform.anchorMax = Vector2.zero;
-
-            //set parent
-            _transform.SetParent(Settings.ActorRoot, true);
-
-            //set position and scale
-            _transform.anchoredPosition = info.Position;
-
-            _transform.localScale = new Vector3(info.Scale, info.Scale, info.Scale);
-             
-            
-            go.SetActive(false);
-            this.Go = go;
-
-            IsEnterScene = false;
         }
 
-        public override void FadeIn(float fadetime)
+        public void SetExpressionWithAnimation(string name, float duration, Action onFinished)
         {
-            /*
-            if (fadetime == 0)
+            var idx = GetExpression(name);
+            if (idx >= 0)
             {
-                Go.SetActive(true);
-                _image.color = new Color(255, 255, 255, 255);
+                var sprite = ExpressionImages[idx];
+
+                Sequence s = DOTween.Sequence();
+                s.Append(CurImage.DOFade(0f, duration/2));            
+                s.AppendCallback(() => CurImage.sprite = sprite);
+                s.Append(CurImage.DOFade(1f, duration / 2));
+                s.AppendCallback(new TweenCallback(onFinished));
+                s.Play();
             }
             else
             {
-                Go.SetActive(true);
-                */
-            //_image.color = new Color(255, 255, 255, 0);
-            Tween t = _image.DOFade(1, fadetime);
-            if (OnAnimationFinish != null)
-                t.OnComplete(new TweenCallback(OnAnimationFinish));
-            //}
-        }
-
-        public override void FadeOut(float fadetime)
-        {
-/*
-            if (fadetime == 0)
-            {
-                Go.SetActive(false);
-                _image.color = new Color(255, 255, 255, 0);
+                Debug.LogErrorFormat("Can not set expression!Actor:{0} Expression:{1}", gameObject.name, name);
+                onFinished();
             }
-            else
-            {
-                Go.SetActive(false);
-                */
-           // _image.color = new Color(255, 255, 255, 255);
-            Tween t = _image.DOFade(0, fadetime);
-            if (OnAnimationFinish != null)
-                t.OnComplete(new TweenCallback(OnAnimationFinish));
-            //}
         }
 
-        public override void SetPosition2D(Vector2 p)
-        {
-            Go.GetComponent<RectTransform>().anchoredPosition = p;
-        }
 
         public void SetScale(float dt)
         {
-            _transform.localScale = new Vector3(dt, dt, 1);
+            Trans.localScale = new Vector3(dt, dt, 1);
         }
 
         public void MoveTo(Vector2 to, float dt)
         {
-            Tween t = _transform.DOAnchorPos(to, dt);
+            Tween t = Trans.DOAnchorPos(to, dt);
             if (OnAnimationFinish != null)
                 t.OnComplete(new TweenCallback(OnAnimationFinish));
         }
 
         public void ScaleTo(float range, float dt)
         {
-            Tween t = _transform.DOScale(range, dt);
+            Tween t = Trans.DOScale(range, dt);
             if (OnAnimationFinish != null)
                 t.OnComplete(new TweenCallback(OnAnimationFinish));
         }

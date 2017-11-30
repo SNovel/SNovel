@@ -43,9 +43,9 @@ namespace SNovel
         }
         public void AddSelect(string imageFileName, string text, Action onClick)
         {
-            SelectObject selectObject = new SelectObject(imageFileName, text, onClick);
-            selectObject.Go.transform.SetParent(SelectLayout, false);   
-            _selectList.Add(selectObject.Go);
+           // SelectObject selectObject = new SelectObject(imageFileName, text, onClick);
+           // selectObject.Trans.SetParent(SelectLayout, false);   
+          //  _selectList.Add(selectObject.gameObject);
         }
 
         public void ShowSelects()

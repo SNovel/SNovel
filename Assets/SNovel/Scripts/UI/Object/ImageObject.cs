@@ -8,157 +8,109 @@ using DG.Tweening;
 
 namespace SNovel
 {
-    class ImageObject:AbstractObject
+    public static class ImageUtil
     {
-        Image _image;
-        ImageInfo _info;
-        /*
-        public ImageObject(string objectName)
+        public static void FadeIn(Image image, float fadetime, Action onAnimationFinish)
         {
-        }
-        */
-
-        public ImageObject()
-        {
-            
-        }
-
-        
-        #region Factory
-        public override void Init(ObjectInfo info)
-        {
-            base.Init(info);
-            
-            _info = (ImageInfo)info;
-
-            Go = new GameObject(info.ObjName);
-
-            _image = Go.AddComponent<Image>();
-            //create image
-            Sprite i = Resources.Load<Sprite>(_info.Path + _info.Name);
-            if (i == null)
-            {
-                Debug.LogFormat("Cannot load image file:{0}", _info.Path + _info.Name);
-            }
-            
-        }
-
-        public override void Init(string objName)
-        {
-            //attach gameobject in scene
-            base.Init(objName);
-
-            _image = Go.GetComponent<Image>();
-
-        }
-        /*
-        public static ImageObject CreateWithSceneObject(string objectName)
-        {
-            ImageObject io = new ImageObject();
-            io.Go = GameObject.Find(objectName);
-            if (io.Go == null)
-            {
-                Debug.LogFormat("Cannot find object:{0}", objectName);
-                return null;
-            }
-            io._image = io.Go.GetComponent<Image>();
-            return io;
-        }
-
-        public static ImageObject CreateWithNewImage(string imageFileName, string objectName)
-        {
-            ImageObject io = new ImageObject();
-
-            io.Go = new GameObject(objectName);
-
-            io._image = io.Go.AddComponent<Image>();
-            //create image
-            Sprite i = Resources.Load<Sprite>(imageFileName);
-            if (i == null)
-            {
-                Debug.LogFormat("Cannot load image file:{0}", imageFileName);
-            }
-            return io;
-        }
-
-        public static ImageObject CreateWithNewImage(ImageInfo info)
-        {
-            GameObject go = Resources.Load<GameObject>(info.Path + info.Name);
-            go = GameObject.Instantiate(go);
-            //create image
-            Sprite i = Resources.Load<Sprite>(info.Path + info.Name);
-            if (i == null)
-            {
-                Debug.LogFormat("Cannot load image file:{0}", info.Path + info.Name);
-            }
-            return go.GetComponent<ImageObject>();
-        }
-
-        public static ImageObject CreateWithInfo(ImageInfo info)
-        {
-            
-            ImageObject io = new ImageObject();
-
-            io.Go = new GameObject(info.ObjName);
-
-            io.SetPosition3D(info.Position);
-
-            io._image = io.Go.AddComponent<Image>();
-            
-            ImageObject io = CreateWithNewImage(info.Path + info.Name, info.ObjName);
-
-            io.SetPosition3D(info.Position);
-
-            io.SetParent(info.Root);
-            return io;
-        }
-
-        public static ImageObject CreateWithPrefab(ImageInfo info)
-        {
-            GameObject go = Resources.Load<GameObject>(info.Path + info.Name);
-            go = GameObject.Instantiate(go);
-            
-            return go.GetComponent<ImageObject>();
-        }
-        */
-        #endregion
-
-        public void ChangeImage(string newImageFileName, float fadeTime)
-        {
-            Sprite i = Resources.Load<Sprite>(newImageFileName);
-            _image.sprite = i;
-            FadeIn(fadeTime);
-            //   Sequence s = DOTween.Sequence();
-            //     s.Append(t);
-
-            //    if(OnAnimationFinish != null)
-            //     s.AppendCallback(new TweenCallback(OnAnimationFinish));
-        }
-
-        public override void FadeIn(float fadetime)
-        {
+            var originColor = image.color;
             if (fadetime == 0)
-                Go.SetActive(true);
+                image.color = new Color(originColor.r, originColor.g, originColor.b, 0);
             else
             {
-                _image.color = new Color(255, 255, 255, 0);
-                Tween t = _image.DOFade(1, fadetime);
-                if (OnAnimationFinish != null)
-                    t.OnComplete(new TweenCallback(OnAnimationFinish));
+                image.color = new Color(1, 1, 1, 0);
+                Tween t = image.DOFade(1, fadetime);
+                if (onAnimationFinish != null)
+                    t.OnComplete(new TweenCallback(onAnimationFinish));
             }
         }
 
-        public override void FadeOut(float fadetime)
+        public static void FadeOut(Image image, float fadetime, Action onAnimationFinish)
         {
+            var originColor = image.color;
             if (fadetime == 0)
-                Go.SetActive(true);
+                image.color = new Color(originColor.r, originColor.g, originColor.b, 1);
             else
             {
-                _image.color = new Color(255, 255, 255, 255);
-                Tween t = _image.DOFade(0, fadetime);
-                if (OnAnimationFinish != null)
-                    t.OnComplete(new TweenCallback(OnAnimationFinish));
+                image.color = new Color(255, 255, 255, 255);
+                Tween t = image.DOFade(0, fadetime);
+                if (onAnimationFinish != null)
+                    t.OnComplete(new TweenCallback(onAnimationFinish));
             }
+        }
+    }
+
+    //默认锚点在左下角
+    class ImageInfo : ObjectInfo
+    {
+        public string Path = "";
+        public bool Show = false;
+        public bool Fade = false;
+        public float Fadetime = 0.0f;
+        public string Root = "";
+        public float Scale = 1;
+        public Vector2 Position = new Vector2(0, 0);
+
+        public Vector2 AnchorPos = new Vector2(0, 0);
+
+        public ImageInfo(Dictionary<string, string> param)
+        {
+            if (param.ContainsKey("assetName"))
+            {
+                AssetName = param["assetName"];
+            }
+            if (param.ContainsKey("path"))
+            {
+                Path = param["path"];
+            }
+            if (param.ContainsKey("show"))
+            {
+                Show = bool.Parse(param["show"]);
+            }
+            if (param.ContainsKey("fadeTime"))
+            {
+                Fadetime = float.Parse(param["fadeTime"]);
+            }
+            if (param.ContainsKey("root"))
+            {
+                Root = param["root"];
+            }
+            if (param.ContainsKey("scale"))
+            {
+                Scale = float.Parse(param["scale"]);
+            }
+        }
+    }
+
+    public class ImageObject : AbstractObject
+    {
+
+        [HideInInspector]
+        public Image CurImage
+        {
+            get
+            {
+                if (_curImage == null)
+                {
+                    _curImage = GetComponent<Image>();
+                }
+                return _curImage;
+            }
+        }
+
+
+        private Image _curImage = null;
+
+        public virtual void FadeIn(float fadetime, Action onFinished)
+        {
+            CurImage.color = new Color(1, 1, 1, 0);
+            CurImage.DOFade(1, fadetime).OnComplete(new TweenCallback(onFinished));
+        }
+
+        public virtual void FadeOut(float fadetime, Action onFinished)
+        {
+            CurImage.color = new Color(1, 1, 1, 1);
+            CurImage.DOFade(0, fadetime).OnComplete(new TweenCallback(onFinished));
+
         }
     }
 }

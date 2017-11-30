@@ -1,0 +1,25 @@
+$script
+playerName="ssss"
+location="(23,234)"
+$end
+
+[create_textbox_prefab name=General] //创建一个General prefab
+
+[show name=General x=540 y=500]
+
+[current name=General_main type=main]//设置当前显示文字的文本框为General 
+[current name=General_name type=name]//设置当前显示文字的文本框为General_name
+#{playerName}
+当前位置为{location}[pl]
+
+$script
+i=1
+$end
+
+[button prefabName=Button name=chapter_scene_1 text=click onClick=show do=i=i+1  x=540 y=860]
+
+[s]
+
+[block name=show]
+点击了{i}次[pl]
+[block_end]

@@ -1,0 +1,4 @@
+﻿[create_image name=null blockTouch=true alpha=0 nativeSize=false width=1080 height=1920]
+[show name=null x=540 y=960]
+
+[button prefabName=Button name=chapter_scene_2  text=nextStage  x=540 y=1060 nativeSize=false width=200 height=200]

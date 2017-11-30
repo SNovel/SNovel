@@ -39,7 +39,7 @@ namespace SNovel
     {
         //默认参数列表 相对于Hashtable Dictionary更加类型安全
         //protected Hashtable _defaultParamSet = new Hashtable();
-        protected Dictionary<string, string> _defaultParamSet;
+        protected Dictionary<string, string> _defaultParams;
 
         //必要参数列表
         protected List<string> _vitalParams;
@@ -96,7 +96,7 @@ namespace SNovel
             LineInScript = lineNo;
 
             //set default value
-            Params = new Dictionary<string, string>(_defaultParamSet);
+            Params = new Dictionary<string, string>(_defaultParams);
 
             //set script value
             foreach (KeyValuePair<string, string> i in info.Params)
@@ -125,6 +125,7 @@ namespace SNovel
                 return;
 
             //log the error key
+            /*
             StringBuilder line = new StringBuilder("[");
             line.Append(_tagInfo.TagName);
 
@@ -132,8 +133,8 @@ namespace SNovel
             {
                 line.Append(" ");
                 line.AppendFormat("{0}={0}", i.Key, i.Value);
-            }
-            Debug.LogFormat("line:{0} {1}\nERROR: Do not contain vital param", LineInScript, line);
+            }*/
+            Debug.LogFormat("line:{0} {1}\nERROR: Do not contain vital param", LineInScript, ToString());
             foreach(string p in errorParams)
             {
                 Debug.LogFormat("Miss Param:{0}\n", p);
@@ -142,19 +143,15 @@ namespace SNovel
 
         public virtual void Before()
         {
-
+            
         }
-
-        public virtual void Excute()
-        {
-
-        }
+        public abstract void Excute();
 
         public virtual void Complete()
         {
-            
         }
 
+        //默认都会nextcommand
         public virtual void After()
         {
             Engine.NextCommand();
@@ -163,6 +160,19 @@ namespace SNovel
         public virtual void OnFinishAnimation()
         {
 
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder("[");
+            sb.Append(_tagInfo.TagName);
+
+            foreach (KeyValuePair<string, string> i in _tagInfo.Params)
+            {
+                sb.Append(" ");
+                sb.AppendFormat("{0}={1}", i.Key, i.Value);
+            }
+            return sb.ToString();
         }
     }
 
@@ -189,7 +199,7 @@ namespace SNovel
             
             catch (Exception e)
             {
-                //Debug.Log(e.ToString());
+                Debug.Log(e.ToString());
             }
 
             if (tag != null)
@@ -213,7 +223,7 @@ namespace SNovel
             }
             catch (Exception e)
             {
-                //Debug.Log(e.ToString());
+                Debug.Log(e.ToString());
             }
 
 

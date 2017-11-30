@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using System.Collections;
@@ -10,7 +11,7 @@ namespace SNovel
     public class TextEffect : MonoBehaviour
     {
         public Text _textUI;
-
+        [Range(1, 10)] public float Speed = 6; 
         enum RenderState
         {
             Rendering,
@@ -32,26 +33,28 @@ namespace SNovel
         Tweener _animation;
         Sequence _sequense;
 
-        public void StartEffect(string fromText, string toText, float duration)
+        public void StartEffect(string fromText, string toText, Action onFinish)
         {
+            _onFinish = onFinish;
             _renderState = RenderState.Rendering;
             _sequense = null;
             _sequense = DOTween.Sequence();
             _textUI.text = fromText;
-            _animation = _textUI.DOText(toText, duration);
+            _animation = _textUI.DOText(toText, Speed* Mathf.Abs(toText.Length-fromText.Length)/100);
             _sequense.Append(_animation);
-            _sequense.AppendCallback(new TweenCallback(FinishDisplay)); 
+            _sequense.AppendCallback(FinishDisplay); 
         }
-        public void StartEffect(string text, float duration)
+        public void StartEffect(string text, Action onFinish)
         {
             _renderState = RenderState.Rendering;
             _sequense = null;
             _sequense = DOTween.Sequence();
-            _animation = _textUI.DOText(text, duration);
+            _animation = _textUI.DOText(text, Speed * text.Length / 100);
             _sequense.Append(_animation);
-            _sequense.AppendCallback(new TweenCallback(FinishDisplay));              
+            _sequense.AppendCallback(FinishDisplay);              
         }
 
+        private Action _onFinish;
         public void DisplayTextRemain()
         {
             _sequense.Complete();
@@ -91,6 +94,7 @@ namespace SNovel
             _renderState = RenderState.Waiting;
         //    MessageDispatcher.Instance.DispatchMessage(
        //         new Message("EVENT_SCRIPT_COMMAND_FINISH"));
+            _onFinish();
         }
     }
 }

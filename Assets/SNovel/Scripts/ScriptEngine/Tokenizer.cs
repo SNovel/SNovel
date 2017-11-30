@@ -12,12 +12,12 @@ using UnityEngine;
  * Scenario: *Demonstration(English)
  * Tag:		 [enterscene name=Schoolgate destroy=true fade=true]
  * Text:	 Nice to meet you.[p]
- * 
+ * Name:     #Niko
+ * Script:   $script $end
  * see [p][r] as a tag 
  * 
  * add:
- * · use '@' to set tag. Now you can use @ or [] to set tag
- *   e.g. @enterscene name=Schoolgate destroy=true fade=true
+ *   [enterscene name=Schoolgate destroy=true fade=true]
  * · use '//' to set commit
  * · use '#' to print name text conveniently. instead of [settext]
  *   e.g. #Sachi 
@@ -65,9 +65,14 @@ namespace SNovel
                 ReadScenario();
                 return _words;
             }
+            if(_line[_pos] == '$')
+            {
+                ReadScript();
+                return _words;
+            }
             else if(_line[_pos] == '#')
             {
-              //  ++_pos;
+                //  ++_pos;
                 ReadName();
                 return _words;
             }
@@ -83,7 +88,7 @@ namespace SNovel
                 {
                     break;
                 }
-                else if (_line[_pos] == '[' || _line[_pos] == '@')
+                else if (_line[_pos] == '[')// || _line[_pos] == '@')
                 {
                     ChangeReadMode(Mode.TAG);
                     ++_pos;
@@ -106,7 +111,6 @@ namespace SNovel
                         ReadAttribute();
                         break;
                     default:
-                   // Debug.Log("WTF! another read mode?");
                     break;
                 }
                 IgnoreBlanks();
@@ -235,6 +239,18 @@ namespace SNovel
             }
 
             _words.Add(tag1);
+        }
+
+        private void ReadScript()
+        {
+            if (_line == "$script")
+            {
+                _words.Add(new KAGWord(KAGWord.Type.TAG, "script", "begin"));
+            }
+            else if (_line == "$end")
+            {
+                _words.Add(new KAGWord(KAGWord.Type.TAG, "script", "end"));
+            }
         }
         private void ReadScenario()
         {

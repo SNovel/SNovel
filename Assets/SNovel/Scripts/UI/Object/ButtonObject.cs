@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+
 namespace SNovel
 {
     /*
@@ -11,43 +8,31 @@ namespace SNovel
      * 
      * Use this to create Button UI elements in scene
      */
-
+    [RequireComponent(typeof(Button))]
     class ButtonObject: AbstractObject
     {
-       
-        Image _image;
-        Text _text;
-        Button _button;
-
-        public ButtonObject(string buttonImageFileName, string text, Action onClick)
+        public string Text
         {
-            Go = Resources.Load(Settings.Instance.PREFAB_PATH + "Button") as GameObject;
-           // Go.SetActive(false);
-            Go = GameObject.Instantiate<GameObject>(Go);
-
-            _image = Go.GetComponent<Image>();
-
-            Sprite sprite = Resources.Load<Sprite>(Settings.Instance.UI_IMAGE_PATH + buttonImageFileName);
-            
-            if (_image && sprite)
+            set
             {
-                _image.sprite = sprite;
+                UIText.text = value;
             }
-            else
+            get
             {
-                Debug.Log("Do not find image file");
-            }
-
-            _text = Go.GetComponentInChildren<Text>();
-            _text.text = text;
-
-            _button = Go.GetComponent<Button>();
-            if(_button)
-            {
-                _button.onClick.AddListener(new UnityEngine.Events.UnityAction(onClick));
+                return UIText.text;
             }
         }
-        
 
+        public Text UIText;
+
+        public Button UIBtn;
+
+        public Image UIImage
+        {
+            get
+            {
+                return GetComponent<Image>();
+            }
+        }
     }
 }
