@@ -22,12 +22,12 @@ namespace SNovel
     {
         public LuascriptTag()
         {
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
                 {"script", "null"}
             };
 
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
             };
         }

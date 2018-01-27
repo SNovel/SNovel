@@ -26,12 +26,12 @@ namespace SNovel
     {
         public PrintTag()
         {
-            _vitalParams = new List<string>
+            VitalParams = new List<string>
             {
                 "text"
             };
 
-            _defaultParams = new Dictionary<string, string>
+            DefaultParams = new Dictionary<string, string>
             {
                 {"text", ""}
             };
@@ -75,14 +75,14 @@ namespace SNovel
     {
         public Format_textTag()
         {
-            _vitalParams = new List<string>
+            VitalParams = new List<string>
             {
                 "text",
                 "var"
 
             };
 
-            _defaultParams = new Dictionary<string, string>
+            DefaultParams = new Dictionary<string, string>
             {
                 {"text", ""},
                 {"var", ""}
@@ -123,12 +123,12 @@ namespace SNovel
     {
         public Set_textTag()
         {
-            _vitalParams = new List<string>
+            VitalParams = new List<string>
             {
                 "text"
             };
 
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
                 {"text", ""},
                 {"textbox", ""}
@@ -167,12 +167,12 @@ namespace SNovel
     {
         public SetnameTag()
         {
-            _vitalParams = new List<string>
+            VitalParams = new List<string>
             {
                 "text"
             };
 
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
                 {"text", ""},
             };
@@ -213,13 +213,13 @@ namespace SNovel
     {
         public CurrentTag()
         {
-            _vitalParams = new List<string>
+            VitalParams = new List<string>
             {
                 "name",
                 "type"
             };
 
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
                 {"name", "TextBox"},
                 {"type", "main" }
@@ -268,11 +268,11 @@ namespace SNovel
     {
         public Create_textboxTag()
         {
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
                 {"name", ""},
             };
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
                 "name"
             };
@@ -330,11 +330,11 @@ namespace SNovel
     {
         public Create_textbox_prefabTag()
         {
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
                 {"name", ""},
             };
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
                 "name"
             };
@@ -384,8 +384,8 @@ namespace SNovel
     {
         public LTag()
         {
-            _vitalParams = new List<string>();
-            _defaultParams = new Dictionary<string, string>();
+            VitalParams = new List<string>();
+            DefaultParams = new Dictionary<string, string>();
         }
 
         public override void Excute()
@@ -411,8 +411,8 @@ namespace SNovel
     {
         public CmTag()
         {
-            _vitalParams = new List<string>();
-            _defaultParams = new Dictionary<string, string>();
+            VitalParams = new List<string>();
+            DefaultParams = new Dictionary<string, string>();
         }
 
         public override void Excute()
@@ -438,8 +438,8 @@ namespace SNovel
     {
         public PTag()
         {
-            _vitalParams = new List<string>();
-            _defaultParams = new Dictionary<string, string>();
+            VitalParams = new List<string>();
+            DefaultParams = new Dictionary<string, string>();
         }
 
         public override void Before()
@@ -470,8 +470,8 @@ namespace SNovel
     {
         public RTag()
         {
-            _vitalParams = new List<string>();
-            _defaultParams = new Dictionary<string, string>();
+            VitalParams = new List<string>();
+            DefaultParams = new Dictionary<string, string>();
         }
 
         public override void Excute()
@@ -495,8 +495,8 @@ namespace SNovel
     {
         public PlTag()
         {
-            _vitalParams = new List<string>();
-            _defaultParams = new Dictionary<string, string>();
+            VitalParams = new List<string>();
+            DefaultParams = new Dictionary<string, string>();
         }
 
         public override void Before()
@@ -529,8 +529,8 @@ namespace SNovel
     {
         public RlTag()
         {
-            _vitalParams = new List<string>();
-            _defaultParams = new Dictionary<string, string>();
+            VitalParams = new List<string>();
+            DefaultParams = new Dictionary<string, string>();
         }
 
         public override void Excute()

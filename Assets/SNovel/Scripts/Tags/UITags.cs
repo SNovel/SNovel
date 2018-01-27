@@ -33,12 +33,12 @@ namespace SNovel
     {
         public ButtonTag()
         {
-            _vitalParams = new List<string>
+            VitalParams = new List<string>
             {
                 "prefabName"
             };
 
-            _defaultParams = new Dictionary<string, string>
+            DefaultParams = new Dictionary<string, string>
             {
                 {"prefabName", ""},
                 {"name", "" },

@@ -26,7 +26,7 @@ namespace SNovel
     {
         public Create_imageTag()
         {
-            _defaultParams = new Dictionary<string,string>() {
+            DefaultParams = new Dictionary<string,string>() {
                 { "name",    "null"         },
                 {"blockTouch","false" },
                 {"alpha", "1" },
@@ -35,7 +35,7 @@ namespace SNovel
                 {"height","100" }
             };
 
-            _vitalParams = new List<string>() {
+            VitalParams = new List<string>() {
             };
         }
 

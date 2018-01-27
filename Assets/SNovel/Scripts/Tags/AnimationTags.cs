@@ -12,12 +12,12 @@ namespace SNovel
     {
         public Play_animationTag()
         {
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
                 {"name", "" }
             };
 
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
                 "name"
             };
@@ -60,13 +60,13 @@ namespace SNovel
     {
         public FadeinTag()
         {
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
                 {"name", ""},
                 {"time", "0.2"},
             };
 
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
                 "name",
             };
@@ -131,13 +131,13 @@ namespace SNovel
     {
         public FadeoutTag()
         {
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
                 {"name", ""},
                 {"time", "0.2"},
             };
 
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
                 "name",
             };

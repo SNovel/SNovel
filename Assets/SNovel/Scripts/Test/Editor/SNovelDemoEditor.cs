@@ -7,7 +7,7 @@ using UnityEditor;
 namespace SNovel.Test
 {
     [CustomEditor(typeof(SNovelDemo))]
-    public class SNovelDemoEditor : Editor
+    public class SNovelDemoEditor : UnityEditor.Editor
     {
         private SNovelDemo demo
         {

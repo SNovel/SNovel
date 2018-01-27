@@ -39,10 +39,10 @@ namespace SNovel
     {
         //默认参数列表 相对于Hashtable Dictionary更加类型安全
         //protected Hashtable _defaultParamSet = new Hashtable();
-        protected Dictionary<string, string> _defaultParams;
+        public Dictionary<string, string> DefaultParams;
 
         //必要参数列表
-        protected List<string> _vitalParams;
+        public List<string> VitalParams;
 
         //Params: contains the param write in the script
         public Dictionary<string, string> Params
@@ -96,13 +96,18 @@ namespace SNovel
             LineInScript = lineNo;
 
             //set default value
-            Params = new Dictionary<string, string>(_defaultParams);
+            Params = new Dictionary<string, string>(DefaultParams);
 
             //set script value
             foreach (KeyValuePair<string, string> i in info.Params)
             {
                 Params[i.Key] =  i.Value;
             }
+        }
+
+        public void Init()
+        {
+            Params = new Dictionary<string, string>(DefaultParams);
         }
         /*
          * 验证此句脚本的语法, 是否包含必须项
@@ -112,7 +117,7 @@ namespace SNovel
             bool hasError = false;
             List<string> errorParams = new List<string>();
 
-            foreach(string key in _vitalParams)
+            foreach(string key in VitalParams)
             {
                 if(!Params.ContainsKey(key))
                 {

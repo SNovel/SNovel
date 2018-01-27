@@ -116,13 +116,13 @@ namespace SNovel
     {
         public Create_actorTag()
         {
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
                 {"name", ""},
                 {"default", "default"},
             };
 
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
                 "name",
             };
@@ -180,7 +180,7 @@ namespace SNovel
         public ExpressionTag()
         {
 
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
                 {"name", ""},
                 {"type", ""},
@@ -188,7 +188,7 @@ namespace SNovel
 
             };
 
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
                 "name",
                 "type"
@@ -241,7 +241,7 @@ namespace SNovel
         public Show_actorTag()
         {
 
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
                 {"name", ""},
                 {"pos", "center"},
@@ -249,7 +249,7 @@ namespace SNovel
                 {"expression", "default" }
             };
 
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
                 "name"
             };

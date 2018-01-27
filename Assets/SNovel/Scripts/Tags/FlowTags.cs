@@ -20,11 +20,11 @@ namespace SNovel
     {
         public ScenarioTag()
         {
-            _vitalParams = new List<string>() {
+            VitalParams = new List<string>() {
                 "scenario"
             };
 
-            _defaultParams = new Dictionary<string, string>() {
+            DefaultParams = new Dictionary<string, string>() {
                 { "scenario", "" }
             };
         }
@@ -60,8 +60,8 @@ namespace SNovel
     {
         public STag()
         {
-            _vitalParams = new List<string>();
-            _defaultParams = new Dictionary<string, string>();
+            VitalParams = new List<string>();
+            DefaultParams = new Dictionary<string, string>();
 
         }
 
@@ -87,10 +87,10 @@ namespace SNovel
     {
         public Select_showTag()
         {
-            _defaultParams = new Dictionary<string, string> {
+            DefaultParams = new Dictionary<string, string> {
             };
 
-            _vitalParams = new List<string>() {
+            VitalParams = new List<string>() {
             };
         }
 
@@ -119,12 +119,12 @@ namespace SNovel
     {
         public Select_newTag()
         {
-            _defaultParams = new Dictionary<string, string> {
+            DefaultParams = new Dictionary<string, string> {
                 {"target", ""},
                 {"text",   ""}
             };
 
-            _vitalParams = new List<string>() {
+            VitalParams = new List<string>() {
                 "target"
             };
         }
@@ -155,11 +155,11 @@ namespace SNovel
     {
         public BlockTag()
         {
-            _defaultParams = new Dictionary<string, string> {
+            DefaultParams = new Dictionary<string, string> {
                 {"name", ""},
             };
 
-            _vitalParams = new List<string>() {
+            VitalParams = new List<string>() {
                 "name"
             };
         }
@@ -172,10 +172,10 @@ namespace SNovel
     {
         public Block_endTag()
         {
-            _defaultParams = new Dictionary<string, string> {
+            DefaultParams = new Dictionary<string, string> {
             };
 
-            _vitalParams = new List<string>() {
+            VitalParams = new List<string>() {
             };
         }
         public override void Excute()
@@ -205,12 +205,12 @@ namespace SNovel
     {
         public CallTag()
         {
-            _defaultParams = new Dictionary<string, string>
+            DefaultParams = new Dictionary<string, string>
             {
                 { "block", ""}
             };
 
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
                 "block"
             };
@@ -241,11 +241,11 @@ namespace SNovel
     {
         public WaitTag()
         {
-            _defaultParams = new Dictionary<string, string>() {
+            DefaultParams = new Dictionary<string, string>() {
                 { "time", "0"}
             };
 
-            _vitalParams = new List<string>() {
+            VitalParams = new List<string>() {
                 "time"
             };
         }
@@ -281,10 +281,10 @@ namespace SNovel
     {
         public EndTag()
         {
-            _defaultParams = new Dictionary<string, string>() {
+            DefaultParams = new Dictionary<string, string>() {
             };
 
-            _vitalParams = new List<string>() {
+            VitalParams = new List<string>() {
             };
         }
 
@@ -319,11 +319,11 @@ namespace SNovel
     {
         public StartTag()
         {
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
             };
 
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
             };
         }

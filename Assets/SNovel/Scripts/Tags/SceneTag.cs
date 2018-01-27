@@ -17,7 +17,7 @@ namespace SNovel
     {
         public ShowTag()
         {
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
                 {"name", ""},
                 {"x", "null"},
@@ -26,7 +26,7 @@ namespace SNovel
                 {"layer", ""}
             };
 
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
                 "name"
             };
@@ -89,12 +89,12 @@ namespace SNovel
     {
         public HideTag()
         {
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
                 {"name", ""},
             };
 
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
                 "name"
             };
@@ -123,11 +123,11 @@ namespace SNovel
     {
         public Clear_allTag()
         {
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
             };
 
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
             };
         }

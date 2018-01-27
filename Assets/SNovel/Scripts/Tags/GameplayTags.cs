@@ -15,10 +15,10 @@ namespace SNovel
     {
         public StartgameTag()
         {
-            _defaultParams = new Dictionary<string, string>()
+            DefaultParams = new Dictionary<string, string>()
             {
             };
-            _vitalParams = new List<string>()
+            VitalParams = new List<string>()
             {
             };
         }
